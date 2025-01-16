@@ -1,0 +1,403 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雪道管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f4f7fa;
+        }
+        .navbar {
+            height: 80px;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 999;
+        }
+        .navbar img {
+            width: 180px;
+            height: 50px;
+            margin-right: 15px;
+        }
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            font-size: 1.6rem;
+            font-weight: bold;
+        }
+        .main-container {
+            display: flex;
+            height: calc(100vh - 80px);
+            margin-top: 80px;
+        }
+        .sidebar {
+            width: 150px;
+            background-color: white;
+            color: black;
+            padding-top: 20px;
+            position: fixed;
+            top: 80px;
+            left: 0;
+            height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 998;
+            border-right: 2px solid #ddd;
+        }
+        .sidebar a {
+            color: black;
+            padding: 15px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .sidebar a i {
+            margin-right: 10px;
+        }
+        .sidebar a:hover {
+            background-color: rgb(187, 190, 190);
+            transform: scale(1.05);
+        }
+        .content {
+            margin-left: 170px;
+            padding: 30px;
+            flex-grow: 1;
+            background-color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .content h2 {
+            margin-bottom: 30px;
+            font-size: 3rem;
+            color: #2C3E50;
+        }
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        .table th, .table td {
+            text-align: center;
+            padding: 15px;
+        }
+        .table thead {
+            background-color: #007bff;
+            color: white;
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f2f2f2;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-dark">
+        <a class="navbar-brand" href="#">
+            <img src="{% static 'image/校徽及标准字（反白）.png' %}" alt="Logo">
+            滑雪场管理系统
+        </a>
+    </nav>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <a href="{% url 'management_equipment' %}"><i class="fas fa-cogs"></i>设备管理</a>
+            <a href="{% url 'management_ski_trail' %}"><i class="fas fa-road"></i>雪道管理</a>
+            <a href="{% url 'management_users' %}"><i class="fas fa-users"></i>用户管理</a>
+            <a href="{% url 'user_ski_info' %}"><i class="fas fa-users"></i>用户信息</a>
+            <a href="{% url 'statistics_view' %}"><i class="fas fa-users"></i>信息统计</a>
+            <a href="{% url 'operation_logs' %}"><i class="fas fa-history"></i>操作日志</a>
+        </div>
+
+        <div class="content">
+            <h2>雪道管理</h2>
+
+            <!-- 雪道信息表格 -->
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">雪道名称</th>
+                        <th scope="col">难度等级</th>
+                        <th scope="col">坡度</th>
+                        <th scope="col">长度</th>
+                        <th scope="col">滑雪道状态</th>
+                        <th scope="col">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ski_trail in ski_trails %}
+                        <tr>
+                            <td>{{ ski_trail.SkiName }}</td>
+                            <td>{{ ski_trail.Difficulty }}</td>
+                            <td>{{ ski_trail.SkiDegree }}</td>
+                            <td>{{ ski_trail.SkiLength }}</td>
+                            <td>{{ ski_trail.SkiStatus }}</td>
+                            <td>
+                                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal" 
+                                        data-name="{{ ski_trail.SkiName }}" 
+                                        data-difficulty="{{ ski_trail.Difficulty }}" 
+                                        data-degree="{{ ski_trail.SkiDegree }}" 
+                                        data-length="{{ ski_trail.SkiLength }}" 
+                                        data-status="{{ ski_trail.SkiStatus }}">修改</button>
+                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                                        data-name="{{ ski_trail.SkiName }}">删除</button>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6">暂无雪道信息</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- 添加雪道按钮 -->
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">添加雪道</button>
+
+            <!-- 编辑雪道 Modal -->
+            <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editModalLabel">修改雪道信息</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="editForm">
+                                <div class="mb-3">
+                                    <label for="editSkiName" class="form-label">雪道名称</label>
+                                    <input type="text" class="form-control" id="editSkiName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editDifficulty" class="form-label">难度等级</label>
+                                    <input type="text" class="form-control" id="editDifficulty" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editSkiDegree" class="form-label">坡度</label>
+                                    <input type="number" step="any" class="form-control" id="editSkiDegree" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editSkiLength" class="form-label">长度</label>
+                                    <input type="number" step="any" class="form-control" id="editSkiLength" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editSkiStatus" class="form-label">滑雪道状态</label>
+                                    <input type="text" class="form-control" id="editSkiStatus" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">提交修改</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 添加雪道 Modal -->
+            <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addModalLabel">添加新雪道</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addForm">
+                                <div class="mb-3">
+                                    <label for="addSkiName" class="form-label">雪道名称</label>
+                                    <input type="text" class="form-control" id="addSkiName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addDifficulty" class="form-label">难度等级</label>
+                                    <input type="text" class="form-control" id="addDifficulty" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addSkiDegree" class="form-label">坡度</label>
+                                    <input type="number" step="any" class="form-control" id="addSkiDegree" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addSkiLength" class="form-label">长度</label>
+                                    <input type="number" step="any" class="form-control" id="addSkiLength" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addSkiStatus" class="form-label">滑雪道状态</label>
+                                    <input type="text" class="form-control" id="addSkiStatus" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">添加雪道</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 删除雪道 Modal -->
+            <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel">确认删除雪道</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>您确定要删除雪道 <span id="deleteSkiName"></span> 吗？</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-danger" id="confirmDeleteButton">删除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 编辑雪道 Modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+            const addModal = new bootstrap.Modal(document.getElementById('addModal'));
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            let selectedSkiTrailName;
+    
+            // 编辑按钮点击事件
+            document.querySelectorAll('.btn-warning').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const skiTrail = button.closest('tr');
+                    const skiTrailName = ski_trail.querySelector('td:nth-child(1)').textContent;
+                    const skiTrailDifficulty = ski_trail.querySelector('td:nth-child(2)').textContent;
+                    const skiTrailDegree = ski_trail.querySelector('td:nth-child(3)').textContent;
+                    const skiTrailLength = ski_trail.querySelector('td:nth-child(4)').textContent;
+                    const skiTrailStatus = ski_trail.querySelector('td:nth-child(5)').textContent;
+    
+                    document.getElementById('editSkiName').value = skiTrailName;
+                    document.getElementById('editDifficulty').value = skiTrailDifficulty;
+                    document.getElementById('editSkiDegree').value = skiTrailDegree;
+                    document.getElementById('editSkiLength').value = skiTrailLength;
+                    document.getElementById('editSkiStatus').value = skiTrailStatus;
+    
+                    selectedSkiTrailName = skiTrailName;
+    
+                    editModal.show();
+                });
+            });
+    
+            // 删除按钮点击事件
+            document.querySelectorAll('.btn-danger').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const skiTrailName = button.closest('tr').querySelector('td:nth-child(1)').textContent;
+                    selectedSkiTrailName = skiTrailName;
+                    deleteModal.show();
+                });
+            });
+    
+            // 删除确认
+            document.getElementById('confirmDeleteButton').addEventListener('click', function() {
+                fetch('{% url 'management_ski_trail' %}', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ "SkiTrailName": selectedSkiTrailName })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            });
+    
+            // 编辑提交
+            document.getElementById('editForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+    
+                const skiTrailData = {
+                    skiTrailName: selectedSkiTrailName,
+                    skiTrailName: document.getElementById('editSkiName').value,
+                    skiTrailDifficulty: document.getElementById('editDifficulty').value,
+                    SkiTrailDegree: document.getElementById('editSkiDegree').value,
+                    SkiTrailLength: document.getElementById('editSkiLength').value,
+                    SkiTrailStatus: document.getElementById('editSkiStatus').value
+                };
+    
+                fetch('{% url 'management_ski_trail' %}', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(skiTrailData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            });
+    
+            // 添加雪道提交
+            document.getElementById('addForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+    
+                const skiTrailData = {
+                    skiTrailName: document.getElementById('addSkiName').value,
+                    skiTrailDifficulty: document.getElementById('addDifficulty').value,
+                    SkiTrailDegree: document.getElementById('addSkiDegree').value,
+                    SkiTrailLength: document.getElementById('addSkiLength').value,
+                    SkiTrailStatus: document.getElementById('addSkiStatus').value
+                };
+    
+                fetch('{% url 'management_ski_trail' %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(skiTrailData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            });
+        });
+    </script>    
+</body>
+</html>
